@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Классификатор обращений API
+  description: API для классификации обращений в техническую поддержку
+  version: 1.0.0
+servers:
+  - url: https://example.com/api/v1
+paths:
+  /classifications:
+    post:
+      summary: Классифицировать обращение
+      description: Определяет категорию переданного текста.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  example: Не могу оплатить обучение
+      responses:
+        '200':
+          description: Классификация выполнена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationResult'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервиса
+  /classifications/{id}:
+    get:
+      summary: Получить результат классификации
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 123
+      responses:
+        '200':
+          description: Результат найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationResult'
+        '404':
+          description: Результат не найден
+  /categories:
+    get:
+      summary: Получить доступные категории
+      responses:
+        '200':
+          description: Список категорий
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                    example: [payment, account, technical, order]
+components:
+  schemas:
+    ClassificationResult:
+      type: object
+      properties:
+        resultId:
+          type: integer
+          example: 123
+        category:
+          type: string
+          example: payment
+        confidence:
+          type: number
+          format: float
+          example: 0.94
+        modelVersion:
+          type: string
+          example: v1.2
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: INVALID_TEXT
+        message:
+          type: string
+          example: Text must not be empty
