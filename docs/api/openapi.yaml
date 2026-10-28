@@ -21,6 +21,7 @@ paths:
               properties:
                 text:
                   type: string
+                  minLength: 1
                   example: Не могу оплатить обучение
       responses:
         '200':
@@ -37,6 +38,10 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           description: Внутренняя ошибка сервиса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /classifications/{id}:
     get:
       summary: Получить результат классификации
@@ -46,7 +51,7 @@ paths:
           required: true
           schema:
             type: integer
-          example: 123
+            example: 123
       responses:
         '200':
           description: Результат найден
@@ -56,6 +61,10 @@ paths:
                 $ref: '#/components/schemas/ClassificationResult'
         '404':
           description: Результат не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /categories:
     get:
       summary: Получить доступные категории
@@ -72,10 +81,20 @@ paths:
                     items:
                       type: string
                     example: [payment, account, technical, order]
+        '500':
+          description: Внутренняя ошибка сервиса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     ClassificationResult:
       type: object
+      required:
+        - resultId
+        - category
+        - confidence
       properties:
         resultId:
           type: integer
@@ -86,12 +105,17 @@ components:
         confidence:
           type: number
           format: float
+          minimum: 0
+          maximum: 1
           example: 0.94
         modelVersion:
           type: string
           example: v1.2
     Error:
       type: object
+      required:
+        - code
+        - message
       properties:
         code:
           type: string
